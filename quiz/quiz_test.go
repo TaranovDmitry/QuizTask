@@ -1,9 +1,9 @@
-package main
+package quiz
 
 import (
-	"testing"
-
+	"QuizTask/entity"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_readQuizFromFile(t *testing.T) {
@@ -13,14 +13,14 @@ func Test_readQuizFromFile(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []quiz
+		want    []entity.Quiz
 		err     string
 		wantErr bool
 	}{
 		{
 			name: "test #1 Success",
 			args: args{fileName: "./testdata/test_problems.json"},
-			want: []quiz{
+			want: []entity.Quiz{
 				{
 					Question: "5+5",
 					Answer:   "10",
@@ -50,7 +50,7 @@ func Test_readQuizFromFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := readQuizFromFile(tt.args.fileName)
+			got, err := ReadQuizFromFile(tt.args.fileName)
 			if tt.wantErr {
 				assert.Nil(t, got)
 				assert.EqualError(t, err, tt.err)
