@@ -41,7 +41,7 @@ func main() {
 
 	fmt.Print(bold, colorBlue, "Time to pass the quiz: ", colorReset, duration, "\n")
 	fmt.Print("Input ", colorGreen, "'start' ", colorReset, "or ", colorReset, colorGreen, "'s' ", colorReset, "to start your quiz: ", colorReset)
-	fmt.Scanf("%s", &input)
+	fmt.Scanf("%s\n", &input)
 
 	if input != "start" && input != "s" {
 		fmt.Print("Incorrect input")
@@ -50,26 +50,26 @@ func main() {
 
 	correct := executeQuiz(duration, quizArr)
 
-	fmt.Print(bold, colorYellow, "\nTotal questions: ", colorReset, +len(quizArr), "\n")
-	fmt.Print(bold, colorGreen, "Correct answers: ", colorReset, +correct, "\n")
+	fmt.Print(bold, colorYellow, "\nTotal questions: ", colorReset, len(quizArr), "\n")
+	fmt.Print(bold, colorGreen, "Correct answers: ", colorReset, correct, "\n")
 }
 
 func readQuizFromFile(fileName string) ([]quiz, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %v", err)
+		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read the file content %s: %v", fileName, err)
+		return nil, fmt.Errorf("failed to read the file content %s: %w", fileName, err)
 	}
 
 	var quizArr []quiz
 	err = json.Unmarshal(bytes, &quizArr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal the file content %s: %v", fileName, err)
+		return nil, fmt.Errorf("failed to unmarshal the file content %s: %w", fileName, err)
 	}
 
 	return quizArr, err
