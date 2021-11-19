@@ -1,9 +1,11 @@
 package quiz
 
 import (
-	"QuizTask/entity"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"QuizTask/entity"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_readQuizFromFile(t *testing.T) {
