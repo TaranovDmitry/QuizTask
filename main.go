@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -18,6 +19,7 @@ type quiz struct {
 }
 
 const (
+	// ANSI escape codes
 	colorReset  = "\033[0m"
 	colorGreen  = "\033[32m"
 	colorYellow = "\033[33m"
@@ -29,6 +31,7 @@ const (
 func main() {
 	quizFile := flag.String("file", "problems.json", "This file contains quiz")
 	duration := flag.Duration("duration", 30*time.Second, "Duration of quiz")
+	shuffle := flag.Bool("shuffle", false, "Shuffle the questions")
 	flag.Parse()
 
 	quizArr, err := readQuizFromFile(*quizFile)
@@ -37,6 +40,9 @@ func main() {
 		return
 	}
 
+	if *shuffle {
+		DoShuffle(quizArr)
+	}
 	var input string
 
 	fmt.Print(bold, colorBlue, "Time to pass the quiz: ", colorReset, duration, "\n")
@@ -52,6 +58,12 @@ func main() {
 
 	fmt.Print(bold, colorYellow, "\nTotal questions: ", colorReset, len(quizArr), "\n")
 	fmt.Print(bold, colorGreen, "Correct answers: ", colorReset, correct, "\n")
+}
+
+func DoShuffle(arr []quiz) []quiz {
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(arr), func(i, j int) { arr[i], arr[j] = arr[j], arr[i] })
+	return arr
 }
 
 func readQuizFromFile(fileName string) ([]quiz, error) {
