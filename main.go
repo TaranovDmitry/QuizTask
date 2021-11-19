@@ -37,8 +37,21 @@ func main() {
 		return
 	}
 
-	Output(duration, quizArr)
+	var input string
 
+	fmt.Print(bold, colorBlue, "Time to pass the quiz: ", colorReset, duration, "\n")
+	fmt.Print("Input ", colorGreen, "'start' ", colorReset, "or ", colorReset, colorGreen, "'s' ", colorReset, "to start your quiz: ", colorReset)
+	fmt.Scanf("%s", &input)
+
+	if input != "start" && input != "s" {
+		fmt.Print("Incorrect input")
+		return
+	}
+
+	correct := executeQuiz(duration, quizArr)
+
+	fmt.Print(bold, colorYellow, "\nTotal questions: ", colorReset, +len(quizArr), "\n")
+	fmt.Print(bold, colorGreen, "Correct answers: ", colorReset, +correct, "\n")
 }
 
 func readQuizFromFile(fileName string) ([]quiz, error) {
@@ -60,22 +73,6 @@ func readQuizFromFile(fileName string) ([]quiz, error) {
 	}
 
 	return quizArr, err
-}
-
-func execute(quizArr []quiz, correctAnswers chan struct{}) {
-	scanner := bufio.NewScanner(os.Stdin)
-	for i, test := range quizArr {
-		fmt.Printf("\n%d question is: %s\n", i+1, test.Question)
-		fmt.Printf("Your answer: ")
-		text := scanner.Text()
-		scanner.Scan()
-
-		if strings.EqualFold(strings.TrimSpace(text), test.Answer) {
-			correctAnswers <- struct{}{}
-		}
-	}
-
-	close(correctAnswers)
 }
 
 func executeQuiz(duration *time.Duration, quizArr []quiz) int {
@@ -101,21 +98,19 @@ func executeQuiz(duration *time.Duration, quizArr []quiz) int {
 	}
 }
 
-func Output(duration *time.Duration, quizArr []quiz) {
+func execute(quizArr []quiz, correctAnswers chan struct{}) {
+	scanner := bufio.NewScanner(os.Stdin)
+	for i, test := range quizArr {
+		fmt.Printf("%d question is: %s\n", i+1, test.Question)
+		fmt.Printf("Your answer: ")
+		scanner.Scan()
 
-	var input string
+		text := scanner.Text()
 
-	fmt.Print(bold, colorBlue, "Time to pass the quiz: ", colorReset, duration, "\n")
-	fmt.Print("Input ", colorGreen, "'start' ", colorReset, "or ", colorReset, colorGreen, "'s' ", colorReset, "to start your quiz: ", colorReset)
-	fmt.Scan(&input)
-
-	if input == "start" || input == "s" {
-
-		correct := executeQuiz(duration, quizArr)
-
-		fmt.Print(bold, colorYellow, "\nTotal questions: ", colorReset, +len(quizArr), "\n")
-		fmt.Print(bold, colorGreen, "Correct answers: ", colorReset, +correct, "\n")
-	} else {
-		fmt.Print("Incorrect input")
+		if strings.EqualFold(strings.TrimSpace(text), test.Answer) {
+			correctAnswers <- struct{}{}
+		}
 	}
+
+	close(correctAnswers)
 }
