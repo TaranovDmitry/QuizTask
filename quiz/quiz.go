@@ -1,7 +1,6 @@
 package quiz
 
 import (
-	"QuizTask/entity"
 	"bufio"
 	"context"
 	"encoding/json"
@@ -11,6 +10,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"QuizTask/entity"
 )
 
 func ReadQuizFromFile(fileName string) ([]entity.Quiz, error) {

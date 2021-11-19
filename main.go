@@ -1,11 +1,12 @@
 package main
 
 import (
-	"QuizTask/entity"
-	"QuizTask/quiz"
 	"flag"
 	"fmt"
 	"time"
+
+	"QuizTask/entity"
+	"QuizTask/quiz"
 )
 
 func main() {
