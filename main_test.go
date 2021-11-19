@@ -17,7 +17,7 @@ func Test_readQuizFromFile(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "test#1 Success",
+			name: "test #1 Success",
 			args: args{fileName: "./testdata/test_problems.json"},
 			want: []quiz{
 				{
@@ -29,7 +29,7 @@ func Test_readQuizFromFile(t *testing.T) {
 					Answer:   "12",
 				},
 			},
-			err: "",
+			err:     "",
 			wantErr: false,
 		},
 		{
@@ -53,12 +53,10 @@ func Test_readQuizFromFile(t *testing.T) {
 			if tt.wantErr {
 				assert.Nil(t, got)
 				assert.EqualError(t, err, tt.err)
-			}else {
+			} else {
 				assert.Equal(t, tt.want, got)
 				assert.NoError(t, err)
 			}
 		})
 	}
 }
-
-

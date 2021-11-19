@@ -18,16 +18,17 @@ type quiz struct {
 }
 
 const (
-	colorReset = "\033[0m"
-	colorGreen = "\033[32m"
+	colorReset  = "\033[0m"
+	colorGreen  = "\033[32m"
 	colorYellow = "\033[33m"
-	colorBlue = "\033[34m"
-	colorRed = "\033[31m"
+	colorBlue   = "\033[34m"
+	colorRed    = "\033[31m"
+	bold        = "\033[1m"
 )
 
 func main() {
 	quizFile := flag.String("file", "problems.json", "This file contains quiz")
-	duration := flag.Duration("duration", 5*time.Second, "Duration of quiz")
+	duration := flag.Duration("duration", 30*time.Second, "Duration of quiz")
 	flag.Parse()
 
 	quizArr, err := readQuizFromFile(*quizFile)
@@ -36,26 +37,46 @@ func main() {
 		return
 	}
 
-	var input string
-
-	fmt.Print(colorBlue,"Time to pass your quiz: ", colorReset)
-	fmt.Println( duration, colorReset)
-	fmt.Print("Input ",colorGreen, "'start' ",colorReset, "or ",colorReset,colorGreen,"'s' ",colorReset, "to start your quiz: ", colorReset)
-	fmt.Scan(&input)
-	if input == "start" || input == "s"{
-
-		correct := executeQuiz(duration, quizArr)
-
-		fmt.Print(colorYellow, "\nTotal questions: ", colorReset)
-		fmt.Println(len(quizArr))
-		fmt.Print(colorGreen, "Correct answers: ", colorReset)
-		fmt.Println(correct)
-	}else {
-		fmt.Print("Incorrect input")
-	}
+	Output(duration, quizArr)
 
 }
 
+func readQuizFromFile(fileName string) ([]quiz, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read the file content %s: %v", fileName, err)
+	}
+
+	var quizArr []quiz
+	err = json.Unmarshal(bytes, &quizArr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the file content %s: %v", fileName, err)
+	}
+
+	return quizArr, err
+}
+
+func execute(quizArr []quiz, correctAnswers chan struct{}) {
+	scanner := bufio.NewScanner(os.Stdin)
+	for i, test := range quizArr {
+		fmt.Printf("\n%d question is: %s\n", i+1, test.Question)
+		fmt.Printf("Your answer: ")
+		text := scanner.Text()
+		scanner.Scan()
+
+		if strings.EqualFold(strings.TrimSpace(text), test.Answer) {
+			correctAnswers <- struct{}{}
+		}
+	}
+
+	close(correctAnswers)
+}
 
 func executeQuiz(duration *time.Duration, quizArr []quiz) int {
 	correctAnswers := make(chan struct{})
@@ -80,40 +101,21 @@ func executeQuiz(duration *time.Duration, quizArr []quiz) int {
 	}
 }
 
-func execute(quizArr []quiz, correctAnswers chan struct{}) {
-	scanner := bufio.NewScanner(os.Stdin)
-	for i, test := range quizArr {
-		fmt.Printf("\n%d question is: %s\n", i+1, test.Question)
-		fmt.Printf("Your answer: ")
-		scanner.Scan()
-		text := scanner.Text()
+func Output(duration *time.Duration, quizArr []quiz) {
 
+	var input string
 
-		if strings.EqualFold(strings.TrimSpace(text), test.Answer) {
-			correctAnswers <- struct{}{}
-		}
+	fmt.Print(bold, colorBlue, "Time to pass the quiz: ", colorReset, duration, "\n")
+	fmt.Print("Input ", colorGreen, "'start' ", colorReset, "or ", colorReset, colorGreen, "'s' ", colorReset, "to start your quiz: ", colorReset)
+	fmt.Scan(&input)
+
+	if input == "start" || input == "s" {
+
+		correct := executeQuiz(duration, quizArr)
+
+		fmt.Print(bold, colorYellow, "\nTotal questions: ", colorReset, +len(quizArr), "\n")
+		fmt.Print(bold, colorGreen, "Correct answers: ", colorReset, +correct, "\n")
+	} else {
+		fmt.Print("Incorrect input")
 	}
-
-	close(correctAnswers)
-}
-
-func readQuizFromFile(fileName string) ([]quiz, error) {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %v", err)
-	}
-	defer file.Close()
-
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read the file content %s: %v", fileName, err)
-	}
-
-	var quizArr []quiz
-	err = json.Unmarshal(bytes, &quizArr)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal the file content %s: %v", fileName, err)
-	}
-
-	return quizArr, err
 }
